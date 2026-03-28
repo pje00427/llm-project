@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: msa-project-part-2
