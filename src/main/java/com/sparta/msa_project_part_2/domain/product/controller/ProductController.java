@@ -19,9 +19,10 @@ public class ProductController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<ProductSearchResponse>> search(
-            @RequestParam String query) {
+        @RequestParam String query,
+        @RequestParam(required = false) String userId) {
 
-        ProductSearchResponse response = productService.search(query);
+        ProductSearchResponse response = productService.search(query, userId);
         return ApiResponse.ok(response);
     }
 }
