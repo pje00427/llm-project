@@ -5,6 +5,7 @@ import com.sparta.msa_project_part_2.domain.product.dto.response.RecommendedProd
 import com.sparta.msa_project_part_2.domain.product.entity.Product;
 import com.sparta.msa_project_part_2.global.exception.DomainException;
 import com.sparta.msa_project_part_2.global.exception.DomainExceptionCode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,11 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProductLlmService {
 
     private final ChatClient chatClient;
 
-    public ProductLlmService(ChatClient.Builder chatClientBuilder) {
-        this.chatClient = chatClientBuilder.build();
-    }
 
     // Step 1: 자연어 → 객체로 자동 변환
     public ProductSearchCondition parseSearchCondition(String query) {
