@@ -20,11 +20,11 @@ spring:
     locations: classpath:db/migration
   ai:
     openai:
-      api-key: AIzaSyC9tEcypUHAIrrSb_3oRF1aA3oDAP9zgO4
+      api-key: AIzaSyAKjpGBt14dnKZpoprFKEKtdnKeDfW8zss
       chat:
         base-url: "https://generativelanguage.googleapis.com/v1beta/openai/"
         options:
-          model: "gemini-2.0-flash"
+          model:  "gemini-2.5-flash-lite"
           temperature: 0.1
           max-tokens: 4096
         completions-path: "/chat/completions"

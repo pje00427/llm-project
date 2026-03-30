@@ -5,12 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @Table(name = "products")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id

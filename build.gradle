@@ -41,7 +41,8 @@ dependencies {
 	// Spring AI
 	// Spring AI - 버전 직접 명시
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M6'
-
+	// 스웨거
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
