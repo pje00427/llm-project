@@ -33,7 +33,9 @@ public class ProductLlmService {
                      keyword가 없으면 null로 설정하세요.
             category: 카테고리명 (없으면 null)
             minPrice: 최소가격 숫자 (없으면 null)
+                      예: "2만원대" → minPrice: 20000
             maxPrice: 최대가격 숫자 (없으면 null)
+                      예: "2만원대" → maxPrice: 29999
             
             만약 요청이 상품 검색과 전혀 무관한 내용이라면 (날씨, 음식, 일상 대화 등)
             모든 필드를 null로 반환하세요.

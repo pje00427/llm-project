@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "products")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id
