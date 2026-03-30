@@ -13,5 +13,5 @@ import org.springframework.data.domain.Page;
 @Builder
 public class ProductSearchResponse {
     private RecommendedProduct recommended;
-    private Page<Product> products;
+    private Page<ProductResponse> products;
 }
