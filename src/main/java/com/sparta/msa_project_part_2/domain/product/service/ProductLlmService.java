@@ -29,14 +29,20 @@ public class ProductLlmService {
             historyPrompt.append("이전 검색 이력:\n");
             for (int i = 0; i < histories.size(); i++) {
                 historyPrompt.append(i + 1).append(". ")
-                    .append("검색어: ").append(histories.get(i).getRawQuery())
-                    .append(", 조건: ").append(histories.get(i).getParsedCondition())
-                    .append("\n");
+                        .append("검색어: ").append(histories.get(i).getRawQuery().replaceAll("[\"']", ""))  // 여기 수정
+                        .append(", 조건: ").append(
+                                histories.get(i).getParsedCondition()
+                                        .replaceAll("[\"'{}]", "")  // 중괄호, 따옴표 제거
+                                        .replaceAll(":", "=")       // 콜론을 = 로 변환
+                        )
+                        .append("\n");
             }
             historyPrompt.append("\n");
         }
 
-        String prompt = """
+    String sanitizedQuery = query.replaceAll("[\"']", "");  // 추가
+
+    String prompt = """
         %s
         사용자의 상품 검색 요청을 분석하여 검색 조건을 추출해주세요.
         
@@ -59,7 +65,7 @@ public class ProductLlmService {
         
         만약 요청이 상품 검색과 전혀 무관한 내용이라면 (날씨, 음식, 일상 대화 등)
         모든 필드를 null로 반환하세요.
-        """.formatted(historyPrompt, query);
+        """.formatted(historyPrompt, sanitizedQuery);  // sanitizedQuery로 수정
 
         try {
             return chatClient.prompt()

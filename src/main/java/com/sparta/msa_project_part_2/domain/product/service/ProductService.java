@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.msa_project_part_2.domain.ai.entity.SearchHistory;              // ✅ 추가
 import com.sparta.msa_project_part_2.domain.ai.repository.SearchHistoryRepository; // ✅ 추가
 import com.sparta.msa_project_part_2.domain.product.dto.ProductSearchCondition;
+import com.sparta.msa_project_part_2.domain.product.dto.response.PageResponse;
 import com.sparta.msa_project_part_2.domain.product.dto.response.ProductResponse;
 import com.sparta.msa_project_part_2.domain.product.dto.response.ProductSearchResponse;
 import com.sparta.msa_project_part_2.domain.product.dto.response.RecommendedProduct;
@@ -68,7 +69,7 @@ public class ProductService {
         if (products.isEmpty()) {
             return ProductSearchResponse.builder()
                 .recommended(null)
-                .products(products.map(ProductResponse::from))
+                .products(new PageResponse<>(products.map(ProductResponse::from)))
                 .build();
         }
 
@@ -96,7 +97,7 @@ public class ProductService {
 
         return ProductSearchResponse.builder()
             .recommended(recommended)
-            .products(productResponses)
-            .build();
+                .products(new PageResponse<>(productResponses))
+                .build();
     }
 }
