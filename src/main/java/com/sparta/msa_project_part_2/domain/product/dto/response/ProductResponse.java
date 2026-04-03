@@ -15,6 +15,8 @@ public class ProductResponse {
     private String name;
     private Integer price;
     private Integer stock;
+    private Double rating;
+    private String categoryName;
 
     public static ProductResponse from(Product product) {
         return ProductResponse.builder()
@@ -22,6 +24,10 @@ public class ProductResponse {
                 .name(product.getName())
                 .price(product.getPrice())
                 .stock(product.getStock())
+                .rating(product.getRating())
+                .categoryName(product.getCategory() != null
+                        ? product.getCategory().getName()
+                        : null)
                 .build();
     }
 }

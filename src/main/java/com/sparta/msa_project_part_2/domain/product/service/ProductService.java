@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class ProductService {
     private final SearchHistoryRepository searchHistoryRepository;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     public ProductSearchResponse search(String query, String userId) {
 
         // 추가 - 이전 검색 이력 조회 (userId가 있을 때만)
@@ -76,6 +78,16 @@ public class ProductService {
         // Step 3: LLM으로 추천 상품 선정 + 홍보 문구 생성
         List<Product> productList = products.getContent();
         RecommendedProduct recommended = productLlmService.generateRecommendation(query, productList);
+
+        // LLM이 반환한 productid 검증하기 !
+        List<Long> validIds = productList.stream().map(Product::getId).toList();
+        if (recommended.getProductId() == null || !validIds.contains(recommended.getProductId())) {
+            log.warn("LLM이 유효하지 않은 productId 반환: {} → 첫 번째 상품으로 대체", recommended.getProductId());
+            recommended = RecommendedProduct.builder()
+                    .productId(productList.get(0).getId())
+                    .message(recommended.getMessage())
+                    .build();
+        }
 
         //  추가 - 검색 이력 저장 (userId가 있을 때만)
         if (userId != null && !userId.isBlank()) {
