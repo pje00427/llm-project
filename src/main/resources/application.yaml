@@ -20,7 +20,7 @@ spring:
     locations: classpath:db/migration
   ai:
     openai:
-      api-key: AIzaSyAKjpGBt14dnKZpoprFKEKtdnKeDfW8zss
+      api-key: ${GEMINI_API_KEY}
       chat:
         base-url: "https://generativelanguage.googleapis.com/v1beta/openai/"
         options:
