@@ -92,6 +92,14 @@ public class ProductService {
         //  추가 - 검색 이력 저장 (userId가 있을 때만)
         if (userId != null && !userId.isBlank()) {
             try {
+                long count = searchHistoryRepository.countByUserId(userId);
+                if (count >= 20) {
+                    searchHistoryRepository.findTopByUserIdOrderByCreatedAtAsc(userId)
+                        .ifPresent(oldest -> {
+                            searchHistoryRepository.delete(oldest);
+                            log.info("검색 이력 정리 - userId: {}, 삭제된 id: {}", userId, oldest.getId());
+                        });
+                }
                 String parsedJson = objectMapper.writeValueAsString(condition);
                 searchHistoryRepository.save(
                     SearchHistory.builder()
