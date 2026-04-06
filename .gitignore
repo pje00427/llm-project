@@ -14,3 +14,5 @@ build/
 # 환경변수 파일 (API 키 등 보안)
 .env
 application-secret.yml
+WEEK4_PLAN.md
+WEEK4_REQUEST.md

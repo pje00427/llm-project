@@ -28,6 +28,9 @@ public class Product {
 
     private Double rating;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;

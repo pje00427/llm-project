@@ -50,7 +50,16 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     }
 
     private BooleanExpression keywordContains(String keyword) {
-        return keyword != null ? product.name.contains(keyword) : null;
+        if (keyword == null) return null;
+
+        // "토너, 크림, 세럼" → ["토너", "크림", "세럼"] OR 조건으로 검색
+        String[] keywords = keyword.split(",");
+        BooleanExpression result = null;
+        for (String kw : keywords) {
+            BooleanExpression expr = product.name.contains(kw.trim());
+            result = result == null ? expr : result.or(expr);
+        }
+        return result;
     }
 
     private BooleanExpression categoryContains(String category) {
