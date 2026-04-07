@@ -40,7 +40,7 @@ public class ProductEmbeddingService {
     }
     @Transactional
     public void embedAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllWithCategory();
         log.info("전체 상품 임베딩 시작: {}개", products.size());
 
         List<Document> documents = products.stream()
