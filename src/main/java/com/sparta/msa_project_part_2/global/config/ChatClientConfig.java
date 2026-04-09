@@ -1,19 +1,36 @@
 package com.sparta.msa_project_part_2.global.config;
 
+import com.sparta.msa_project_part_2.global.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class ChatClientConfig {
 
   @Bean
-  public ChatClient chatClient(ChatClient.Builder builder) {
+  public ChatMemory chatMemory() {
+    return new InMemoryChatMemory();
+  }
+
+  @Bean
+  public ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
     return builder
-        .defaultSystem("""
-                        당신은 스킨케어 & 코스메틱 상품 전문 쇼핑 어드바이저입니다.
-                        사용자의 요청에 맞는 상품을 친절하게 추천해주세요.
-                        """)
-        .build();
+            .defaultSystem("""
+                            당신은 스킨케어 & 코스메틱 상품 전문 쇼핑 어드바이저입니다.
+                            사용자의 요청에 맞는 상품을 친절하게 추천해주세요.
+                            """)
+            .defaultAdvisors(
+                    new SafeGuardAdvisor(
+                            List.of("욕설", "비속어", "꺼져", "씨발", "개새끼", "병신")
+                    ),
+                    new MessageChatMemoryAdvisor(chatMemory)
+            )
+            .build();
   }
 }

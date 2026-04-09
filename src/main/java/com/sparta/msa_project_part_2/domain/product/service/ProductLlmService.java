@@ -1,6 +1,5 @@
 package com.sparta.msa_project_part_2.domain.product.service;
 
-import com.sparta.msa_project_part_2.domain.ai.entity.SearchHistory;
 import com.sparta.msa_project_part_2.domain.product.dto.ProductSearchCondition;
 import com.sparta.msa_project_part_2.domain.product.dto.response.RecommendedProduct;
 import com.sparta.msa_project_part_2.domain.product.entity.Product;
@@ -9,6 +8,7 @@ import com.sparta.msa_project_part_2.global.exception.DomainExceptionCode;
 import com.sparta.msa_project_part_2.global.prompt.ProductPrompts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
@@ -26,45 +26,29 @@ public class ProductLlmService {
      * 사용자의 자연어 검색어를 구조화된 검색 조건으로 파싱
      * 이전 검색 이력을 컨텍스트로 활용
      */
-    public ProductSearchCondition parseSearchCondition(String query, List<SearchHistory> histories) {
-
-        StringBuilder historyPrompt = new StringBuilder();
-        if (!histories.isEmpty()) {
-            historyPrompt.append("이전 검색 이력:\n");
-            for (int i = 0; i < histories.size(); i++) {
-                historyPrompt.append(i + 1).append(". ")
-                    .append("검색어: ").append(histories.get(i).getRawQuery().replaceAll("[\"']", ""))
-                    .append(", 조건: ").append(
-                        histories.get(i).getParsedCondition()
-                            .replaceAll("[\"'{}]", "")
-                            .replaceAll(":", "=")
-                    )
-                    .append("\n");
-            }
-            historyPrompt.append("\n");
-        }
+    public ProductSearchCondition parseSearchCondition(String query, String userId) {
 
         String sanitizedQuery = query
-            .replaceAll("[\"']", "")
-            .replaceAll("(?i)(ignore|forget|무시|위의|지시|system|prompt)", "");
-
-        String userPrompt = """
-                %s
-                요청: %s
-                """.formatted(historyPrompt, sanitizedQuery);
+                .replaceAll("[\"']", "")
+                .replaceAll("(?i)(ignore|forget|무시|위의|지시|system|prompt)", "");
 
         try {
             return chatClient.prompt()
-                .system(ProductPrompts.HISTORY_SYSTEM_PROMPT)
-                .user(userPrompt)
-                .call()
-                .entity(ProductSearchCondition.class);
-        } catch (Exception e) {
+                    .system(ProductPrompts.HISTORY_SYSTEM_PROMPT)
+                    .user(sanitizedQuery)
+                    .advisors(advisor -> advisor
+                            .param("chat_memory_conversation_id", userId) // userId로 대화 구분
+                    )
+                    .call()
+                    .entity(ProductSearchCondition.class);
+        } catch (IllegalArgumentException e) {
+            log.warn("부적절한 내용 감지: {}", e.getMessage());
+            throw new DomainException(DomainExceptionCode.BLOCKED_CONTENT);
+        }  catch (Exception e) {
             log.error("LLM 파싱 실패: {}", e.getMessage());
             throw new DomainException(DomainExceptionCode.LLM_PARSING_FAILED);
         }
     }
-
     /**
      * RAG용 LLM 조건 추출
      * 벡터 검색 후보 상품 목록을 컨텍스트로 활용
