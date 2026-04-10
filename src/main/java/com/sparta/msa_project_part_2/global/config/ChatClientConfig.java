@@ -4,7 +4,8 @@ import com.sparta.msa_project_part_2.global.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +16,9 @@ public class ChatClientConfig {
 
   @Bean
   public ChatMemory chatMemory() {
-    return new InMemoryChatMemory();
+    return MessageWindowChatMemory.builder()
+            .chatMemoryRepository(new InMemoryChatMemoryRepository())
+            .build();
   }
 
   @Bean
@@ -29,7 +32,7 @@ public class ChatClientConfig {
                     new SafeGuardAdvisor(
                             List.of("욕설", "비속어", "꺼져", "씨발", "개새끼", "병신")
                     ),
-                    new MessageChatMemoryAdvisor(chatMemory)
+                    MessageChatMemoryAdvisor.builder(chatMemory).build()
             )
             .build();
   }

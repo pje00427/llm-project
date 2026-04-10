@@ -7,6 +7,8 @@ import com.sparta.msa_project_part_2.domain.product.dto.response.ProductSearchRe
 import com.sparta.msa_project_part_2.domain.product.dto.response.RecommendedProduct;
 import com.sparta.msa_project_part_2.domain.product.entity.Product;
 import com.sparta.msa_project_part_2.domain.product.repository.ProductRepository;
+import com.sparta.msa_project_part_2.global.exception.DomainException;
+import com.sparta.msa_project_part_2.global.exception.DomainExceptionCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -33,10 +35,25 @@ public class ProductRagService {
         log.info("벡터 검색 완료 - 후보 수: {}", candidates.size());
 
         // Step 2: 후보 상품 컨텍스트로 LLM 검색 조건 추출
-        ProductSearchCondition condition = productLlmService.extractConditionWithCandidates(query, candidates);
+        // LLM 실패 시 빈 조건으로 폴백 (전체 상품 조회)
+        ProductSearchCondition condition;
+        try {
+            condition = productLlmService.extractConditionWithCandidates(query, candidates);
+        } catch (Exception e) {
+            log.warn("LLM 조건 추출 실패 - 빈 조건으로 폴백: {}", e.getMessage());
+            condition = new ProductSearchCondition(null, null, null, null);
+        }
         log.info("RAG 파싱된 검색 조건 - keyword: {}, category: {}, minPrice: {}, maxPrice: {}",
                 condition.getKeyword(), condition.getCategory(),
                 condition.getMinPrice(), condition.getMaxPrice());
+
+        // 상품 검색과 무관한 질문 예외처리
+        if (condition.getKeyword() == null
+                && condition.getCategory() == null
+                && condition.getMinPrice() == null
+                && condition.getMaxPrice() == null) {
+            throw new DomainException(DomainExceptionCode.INVALID_SEARCH_QUERY);
+        }
 
         // Step 3: QueryDSL 정밀 필터링
         Page<Product> products = productRepository.searchProducts(
@@ -56,8 +73,18 @@ public class ProductRagService {
         }
 
         // Step 4: LLM 추천 문구 생성
+        // LLM 실패 시 기본 메시지로 폴백
         List<Product> productList = products.getContent();
-        RecommendedProduct recommended = productLlmService.generateRecommendation(query, productList);
+        RecommendedProduct recommended;
+        try {
+            recommended = productLlmService.generateRecommendation(query, productList);
+        } catch (Exception e) {
+            log.warn("LLM 추천 생성 실패 - 기본 메시지로 폴백: {}", e.getMessage());
+            recommended = RecommendedProduct.builder()
+                    .productId(productList.get(0).getId())
+                    .message("이런 상품은 어떠세요?")
+                    .build();
+        }
 
         // LLM 반환 productId 유효성 검증
         List<Long> validIds = productList.stream().map(Product::getId).toList();

@@ -1,9 +1,11 @@
 package com.sparta.msa_project_part_2.global.advisor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
-import org.springframework.ai.chat.client.advisor.api.AdvisedResponse;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
+import org.springframework.ai.chat.messages.UserMessage;
 
 import java.util.List;
 
@@ -20,8 +22,9 @@ public class SafeGuardAdvisor implements BaseAdvisor {
      * 입력 검증 - LLM 호출 전 실행
      */
     @Override
-    public AdvisedRequest before(AdvisedRequest request) {
-        String userText = request.userText();
+    public ChatClientRequest before(ChatClientRequest request, AdvisorChain chain) {
+        UserMessage userMessage = request.prompt().getUserMessage();
+        String userText = userMessage != null ? userMessage.getText() : null;
 
         for (String keyword : blockedKeywords) {
             if (userText != null && userText.contains(keyword)) {
@@ -36,8 +39,8 @@ public class SafeGuardAdvisor implements BaseAdvisor {
      * 출력 검증 - LLM 응답 후 실행
      */
     @Override
-    public AdvisedResponse after(AdvisedResponse response) {
-        String responseText = response.response()
+    public ChatClientResponse after(ChatClientResponse response, AdvisorChain chain) {
+        String responseText = response.chatResponse()
                 .getResult()
                 .getOutput()
                 .getText();
