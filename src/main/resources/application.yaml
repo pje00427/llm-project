@@ -1,6 +1,6 @@
 spring:
   application:
-    name: sparta-msa-project-part-2
+    name: sparta-msa-project-part-3
   autoconfigure:
     exclude:
       - org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreAutoConfiguration
