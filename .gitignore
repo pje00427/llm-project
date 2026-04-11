@@ -1,0 +1,18 @@
+# Gradle 빌드 결과물
+build/
+.gradle/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# macOS
+.DS_Store
+
+# 환경변수 파일 (API 키 등 보안)
+.env
+application-secret.yml
+WEEK4_PLAN.md
+WEEK4_REQUEST.md

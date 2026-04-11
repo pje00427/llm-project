@@ -1,0 +1,4 @@
+package com.sparta.msa_project_part_2.domain.product.dto.request;
+
+public class ProductRequest {
+}
