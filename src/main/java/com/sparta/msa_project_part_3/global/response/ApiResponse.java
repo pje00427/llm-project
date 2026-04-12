@@ -21,7 +21,14 @@ public class ApiResponse<T> {
     Boolean result;
     Error error;
     T message;
-
+    // 반환할 데이터가 없을 때 (로그아웃, 회원가입 성공 등)
+    public static <T> ResponseEntity<ApiResponse<T>> ok() {
+        return ResponseEntity.ok(
+            ApiResponse.<T>builder()
+                .result(true)
+                .build()
+        );
+    }
     public static <T> ResponseEntity<ApiResponse<T>> ok(T message) {
         return ResponseEntity.ok(
                 ApiResponse.<T>builder()
