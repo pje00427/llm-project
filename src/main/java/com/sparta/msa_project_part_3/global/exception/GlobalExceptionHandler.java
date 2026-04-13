@@ -3,6 +3,7 @@ package com.sparta.msa_project_part_3.global.exception;
 import com.sparta.msa_project_part_3.global.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,6 +37,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBadCredentialsException(BadCredentialsException e) {
+        return ApiResponse.fail(
+                HttpStatus.UNAUTHORIZED,
+                "UNAUTHORIZED",
+                "이메일 또는 비밀번호가 올바르지 않습니다."
+        );
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception e) {
         return ApiResponse.fail(

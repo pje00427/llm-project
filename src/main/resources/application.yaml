@@ -10,6 +10,17 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  session:
+    store-type: redis
+
+  cache:
+    type: redis
+
   jpa:
     hibernate:
       ddl-auto: none
