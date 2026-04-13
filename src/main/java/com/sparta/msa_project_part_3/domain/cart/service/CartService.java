@@ -5,6 +5,8 @@ import com.sparta.msa_project_part_3.domain.cart.dto.request.CartUpdateRequest;
 import com.sparta.msa_project_part_3.domain.cart.dto.response.CartResponse;
 import com.sparta.msa_project_part_3.domain.cart.entity.CartItem;
 import com.sparta.msa_project_part_3.domain.cart.repository.CartItemRepository;
+import com.sparta.msa_project_part_3.domain.product.entity.Product;
+import com.sparta.msa_project_part_3.domain.product.repository.ProductRepository;
 import com.sparta.msa_project_part_3.global.exception.DomainException;
 import com.sparta.msa_project_part_3.global.exception.DomainExceptionCode;
 import java.util.List;
@@ -17,17 +19,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
 
   private final CartItemRepository cartItemRepository;
+  private final ProductRepository productRepository;
 
-  // 장바구니 전체 조회 - 세션에서 추출한 userId로 해당 사용자 장바구니만 조회
+  // 장바구니 전체 조회
   @Transactional(readOnly = true)
   public List<CartResponse> getCartItems(Long userId) {
     return cartItemRepository.findByUserId(userId)
         .stream()
-        .map(item -> CartResponse.builder()
-            .cartItemId(item.getId())
-            .productId(item.getProductId())
-            .quantity(item.getQuantity())
-            .build())
+        .map(item -> {
+          Product product = productRepository.findById(item.getProductId())
+              .orElse(null);
+
+          return CartResponse.builder()
+              .cartItemId(item.getId())
+              .productId(item.getProductId())
+              .quantity(item.getQuantity())
+              .productName(product != null ? product.getName() : null)
+              .productPrice(product != null ? product.getPrice() : null)
+              .build();
+        })
         .toList();
   }
 
