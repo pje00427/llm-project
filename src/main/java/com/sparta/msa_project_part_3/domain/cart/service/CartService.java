@@ -11,6 +11,8 @@ import com.sparta.msa_project_part_3.global.exception.DomainException;
 import com.sparta.msa_project_part_3.global.exception.DomainExceptionCode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,10 @@ public class CartService {
   private final ProductRepository productRepository;
 
   // 장바구니 전체 조회
+  // [캐싱 추가] userId별로 캐시 키가 다르게 저장됨 → "cart::1", "cart::2"
+  // 캐시가 있으면 DB 조회 없이 Redis에서 바로 반환
+  // 캐시가 없으면 DB 조회 후 Redis에 저장
+  @Cacheable(value = "cart", key = "#userId")
   @Transactional(readOnly = true)
   public List<CartResponse> getCartItems(Long userId) {
     return cartItemRepository.findByUserId(userId)
@@ -43,6 +49,8 @@ public class CartService {
 
   // 장바구니 상품 추가
   // 이미 담긴 상품이면 수량만 증가, 없으면 새로 추가
+  // [캐싱 추가] 장바구니 변경 시 해당 사용자 캐시 삭제 → 다음 조회 시 최신 데이터 반영
+  @CacheEvict(value = "cart", key = "#userId")
   @Transactional
   public CartResponse addCartItem(Long userId, CartAddRequest request) {
     CartItem cartItem = cartItemRepository
@@ -69,6 +77,8 @@ public class CartService {
   }
 
   // 장바구니 상품 수량 수정
+  // [캐싱 추가] 수량 변경 시 해당 사용자 캐시 삭제 → 다음 조회 시 최신 데이터 반영
+  @CacheEvict(value = "cart", key = "#userId")
   @Transactional
   public CartResponse updateCartItem(Long userId, Long productId, CartUpdateRequest request) {
     CartItem cartItem = cartItemRepository
@@ -85,6 +95,8 @@ public class CartService {
   }
 
   // 장바구니 상품 삭제
+  // [캐싱 추가] 상품 삭제 시 해당 사용자 캐시 삭제 → 다음 조회 시 최신 데이터 반영
+  @CacheEvict(value = "cart", key = "#userId")
   @Transactional
   public void deleteCartItem(Long userId, Long productId) {
     CartItem cartItem = cartItemRepository

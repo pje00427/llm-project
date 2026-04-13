@@ -23,7 +23,7 @@ public class ProductVectorSearchService {
      * 벡터 유사도 검색 - 캐시 적용
      * 동일한 query는 Gemini API 재호출 없이 캐시에서 반환
      */
-    @Cacheable(value = "embeddings", key = "#query")
+    @Cacheable(value = "embeddings", key = "#query", cacheManager = "caffeineCacheManager")
     public List<Document> searchCandidates(String query) {
         log.info("캐시 미스 - Gemini API 호출: {}", query);
         try {
