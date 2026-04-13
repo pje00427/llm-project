@@ -16,7 +16,8 @@ public enum DomainExceptionCode {
     BLOCKED_CONTENT(HttpStatus.BAD_REQUEST, "부적절한 내용이 포함되어 있습니다."),
     // 사용자를 찾을 수 없을 때 (로그인 실패, 내 정보 조회 시 미로그인 등)
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
-
+    // 장바구니 아이템을 찾을 수 없을 때
+    NOT_FOUND_CART_ITEM(HttpStatus.NOT_FOUND, "장바구니 상품을 찾을 수 없습니다."),
     // 이메일 중복 가입 시도 시
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
     private final HttpStatus status;
