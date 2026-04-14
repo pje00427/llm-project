@@ -3,6 +3,10 @@ package com.sparta.msa_project_part_3.domain.auth.service;
 import com.sparta.msa_project_part_3.domain.auth.dto.request.LoginRequest;
 import com.sparta.msa_project_part_3.domain.auth.dto.request.RegistrationRequest;
 import com.sparta.msa_project_part_3.domain.auth.dto.response.LoginResponse;
+import com.sparta.msa_project_part_3.domain.cart.dto.request.CartAddRequest;
+import com.sparta.msa_project_part_3.domain.cart.dto.response.CartResponse;
+import com.sparta.msa_project_part_3.domain.cart.service.CartService;
+import com.sparta.msa_project_part_3.domain.cart.service.GuestCartService;
 import com.sparta.msa_project_part_3.domain.user.entity.User;
 import com.sparta.msa_project_part_3.domain.user.repository.UserRepository;
 import com.sparta.msa_project_part_3.global.exception.DomainException;
@@ -10,6 +14,7 @@ import com.sparta.msa_project_part_3.global.exception.DomainExceptionCode;
 import com.sparta.msa_project_part_3.global.security.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +39,10 @@ public class AuthService {
   private final AuthenticationManager authenticationManager;
   // 인증 정보를 HttpSession에 저장/조회하는 저장소 - SecurityConfig에서 HttpSessionSecurityContextRepository로 등록
   private final SecurityContextRepository securityContextRepository;
+  // [추가] 비회원 장바구니 서비스 - 로그인 시 비회원 장바구니를 회원 장바구니로 합치기 위해 필요
+  private final GuestCartService guestCartService;
+  // [추가] 회원 장바구니 서비스 - 비회원 장바구니 합치기 시 사용
+  private final CartService cartService;
 
   @Transactional
   public void registration(RegistrationRequest request) {
@@ -74,6 +83,23 @@ public class AuthService {
 
     // 인증된 사용자 정보를 CustomUserDetails에서 꺼내서 응답 반환
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+    // [추가] 로그인 시 비회원 장바구니 → 회원 장바구니 합치기
+    // 현재 세션 ID로 비회원 장바구니 조회
+    String sessionId = request.getSession().getId();
+    List<CartResponse> guestCartItems = guestCartService.getCartItemsRaw(sessionId);
+
+    if (!guestCartItems.isEmpty()) {
+      for (CartResponse item : guestCartItems) {
+        // 비회원 장바구니 상품을 회원 장바구니에 추가
+        // 이미 있는 상품이면 수량 증가, 없으면 새로 추가
+        cartService.addCartItem(userDetails.getUserId(),
+                new CartAddRequest(item.getProductId(), item.getQuantity()));
+      }
+      // 합치기 완료 후 비회원 장바구니 삭제
+      guestCartService.clearCart(sessionId);
+      log.info("비회원 장바구니 합치기 완료: userId={}", userDetails.getUserId());
+    }
 
     return LoginResponse.builder()
         .userId(userDetails.getUserId())

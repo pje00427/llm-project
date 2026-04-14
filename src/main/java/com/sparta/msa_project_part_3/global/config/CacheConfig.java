@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 @Configuration
@@ -26,16 +26,20 @@ public class CacheConfig {
     @Primary
     public CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofHours(1))
-            .serializeValuesWith(
-                RedisSerializationContext.SerializationPair.fromSerializer(
-                    new GenericJackson2JsonRedisSerializer()
-                )
-            );
+                .entryTtl(Duration.ofHours(1))
+                // [수정] GenericJackson2JsonRedisSerializer → Jackson2JsonRedisSerializer
+                // GenericJackson2JsonRedisSerializer는 타입 정보(@class)를 JSON에 포함시켜
+                // 역직렬화 시 타입 불일치 오류 발생
+                // Jackson2JsonRedisSerializer는 타입 정보 없이 순수 JSON으로 저장/조회
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new Jackson2JsonRedisSerializer<>(Object.class)
+                        )
+                );
 
         return RedisCacheManager.builder(redisConnectionFactory)
-            .cacheDefaults(config)
-            .build();
+                .cacheDefaults(config)
+                .build();
     }
 
     // 기존 Caffeine 캐시 - embeddings용
@@ -43,9 +47,9 @@ public class CacheConfig {
     public CacheManager caffeineCacheManager() {
         CaffeineCacheManager manager = new CaffeineCacheManager("embeddings");
         manager.setCaffeine(Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .maximumSize(1000)
-            .recordStats());
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .maximumSize(1000)
+                .recordStats());
         return manager;
     }
 }

@@ -30,7 +30,7 @@ public class SecurityConfig {
   public static final String[] SECURITY_EXCLUDE_PATHS = {
       "/public/**", "/api/swagger-ui/**", "/swagger-ui/**", "/swagger-ui.html",
       "/api/v3/api-docs/**", "/v3/api-docs/**", "/favicon.ico", "/actuator/**",
-      "/swagger-resources/**", "/external/**", "/api/auth/**"
+      "/swagger-resources/**", "/external/**", "/api/auth/**", "/api/cart/**"
   };
 
   private final ObjectMapper objectMapper;
