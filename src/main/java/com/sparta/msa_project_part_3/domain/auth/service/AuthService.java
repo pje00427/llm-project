@@ -109,16 +109,10 @@ public class AuthService {
 
   // 내 정보 조회 - SecurityContext에서 인증 정보 꺼내서 반환
   public LoginResponse getLoginInfo(Authentication authentication) {
-    try {
-      Object principal = authentication.getPrincipal();
-      Long userId = (Long) principal.getClass().getMethod("getUserId").invoke(principal);
-      String email = (String) principal.getClass().getMethod("getEmail").invoke(principal);
-      return LoginResponse.builder()
-          .userId(userId)
-          .email(email)
-          .build();
-    } catch (Exception e) {
-      throw new DomainException(DomainExceptionCode.NOT_FOUND_USER);
-    }
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+    return LoginResponse.builder()
+        .userId(userDetails.getUserId())
+        .email(userDetails.getEmail())
+        .build();
   }
 }
