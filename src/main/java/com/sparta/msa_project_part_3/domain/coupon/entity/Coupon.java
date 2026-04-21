@@ -84,4 +84,8 @@ public class Coupon extends BaseEntity { // createdAt, updatedAt 자동 관리
     public void delete() {
         this.isDeleted = true;
     }
+
+    public void increaseUsedCount() {
+        this.usedCount += 1;
+    }
 }

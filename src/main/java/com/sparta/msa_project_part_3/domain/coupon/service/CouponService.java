@@ -4,6 +4,7 @@ import com.sparta.msa_project_part_3.domain.coupon.dto.request.CouponBulkIssueRe
 import com.sparta.msa_project_part_3.domain.coupon.dto.request.CouponCreateRequest;
 import com.sparta.msa_project_part_3.domain.coupon.dto.request.CouponRegisterRequest;
 import com.sparta.msa_project_part_3.domain.coupon.dto.response.CouponResponse;
+import com.sparta.msa_project_part_3.domain.coupon.dto.response.CouponUserResponse;
 import com.sparta.msa_project_part_3.domain.coupon.dto.response.MaxDiscountResponse;
 import com.sparta.msa_project_part_3.domain.coupon.entity.Coupon;
 import com.sparta.msa_project_part_3.domain.coupon.entity.CouponUser;
@@ -156,5 +157,38 @@ public class CouponService {
 
         // 쿠폰 등록
         couponUser.register(request.getUserId());
+    }
+
+    // 특정 유저 쿠폰 목록 조회
+    @Transactional(readOnly = true)
+    public List<CouponUserResponse> getUserCoupons(Long userId) {
+        return couponUserRepository.findAllByUserId(userId)
+                .stream()
+                .map(CouponUserResponse::from)
+                .toList();
+    }
+
+    // 쿠폰 삭제
+    @Transactional
+    public void deleteCouponUser(Long couponUserId) {
+        CouponUser couponUser = couponUserRepository.findById(couponUserId)
+                .orElseThrow(() -> new DomainException(DomainExceptionCode.INVALID_COUPON_CODE));
+        couponUserRepository.delete(couponUser);
+    }
+    // 쿠폰 사용하기
+    @Transactional
+    public void useCoupon(Long couponUserId) {
+        CouponUser couponUser = couponUserRepository.findById(couponUserId)
+                .orElseThrow(() -> new DomainException(DomainExceptionCode.INVALID_COUPON_CODE));
+
+        if (couponUser.getStatus() != CouponStatus.REGISTERED) {
+            throw new DomainException(DomainExceptionCode.ALREADY_REGISTERED_COUPON);
+        }
+
+        // coupon_user 상태 변경
+        couponUser.use();
+
+        // coupon used_count 증가
+        couponUser.getCoupon().increaseUsedCount();
     }
 }

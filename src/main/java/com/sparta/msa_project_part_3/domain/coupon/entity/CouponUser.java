@@ -59,4 +59,8 @@ public class CouponUser extends BaseEntity {
         this.userId = userId;
         this.status = CouponStatus.REGISTERED;
     }
+    // 쿠폰 사용 처리
+    public void use() {
+        this.status = CouponStatus.USED;
+    }
 }
