@@ -1,7 +1,7 @@
 package com.sparta.msa_project_part_3.domain.coupon.repository;
 
 import com.sparta.msa_project_part_3.domain.coupon.entity.CouponUser;
-import io.lettuce.core.dynamic.annotation.Param;
+
 import jakarta.persistence.LockModeType;
 
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
