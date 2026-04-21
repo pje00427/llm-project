@@ -1,0 +1,19 @@
+package com.sparta.msa_project_part_3.domain.coupon.repository;
+
+import com.sparta.msa_project_part_3.domain.coupon.entity.CouponUser;
+import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.persistence.LockModeType;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CouponUserRepository extends JpaRepository<CouponUser, Long> {
+
+    // 쿠폰 코드로 조회 + 비관적 락 (동시 등록 방지)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT cu FROM CouponUser cu JOIN FETCH cu.coupon WHERE cu.code = :code")
+    Optional<CouponUser> findByCode(@Param("code") String code);
+}

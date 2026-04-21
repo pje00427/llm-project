@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.sparta.msa_project_part_3.domain.coupon.dto.response.MaxDiscountResponse;
+import com.sparta.msa_project_part_3.domain.coupon.service.CouponService;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final ProductRagService productRagService;
+    private final CouponService couponService;
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<ProductSearchResponse>> search(
@@ -38,5 +42,11 @@ public class ProductController {
 
         ProductSearchResponse response = productRagService.searchRag(query, pageable);
         return ApiResponse.ok(response);
+    }
+
+    @GetMapping("/{productId}/max-discount")
+    public ResponseEntity<ApiResponse<MaxDiscountResponse>> getMaxDiscount(
+            @PathVariable Long productId) {
+        return ApiResponse.ok(couponService.getMaxDiscount(productId));
     }
 }

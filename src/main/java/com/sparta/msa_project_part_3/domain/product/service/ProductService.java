@@ -1,7 +1,7 @@
 package com.sparta.msa_project_part_3.domain.product.service;
 
 import com.sparta.msa_project_part_3.domain.product.dto.ProductSearchCondition;
-import com.sparta.msa_project_part_3.domain.product.dto.response.PageResponse;
+import com.sparta.msa_project_part_3.global.response.PageResponse;
 import com.sparta.msa_project_part_3.domain.product.dto.response.ProductResponse;
 import com.sparta.msa_project_part_3.domain.product.dto.response.ProductSearchResponse;
 import com.sparta.msa_project_part_3.domain.product.dto.response.RecommendedProduct;

@@ -19,7 +19,13 @@ public enum DomainExceptionCode {
     // 장바구니 아이템을 찾을 수 없을 때
     NOT_FOUND_CART_ITEM(HttpStatus.NOT_FOUND, "장바구니 상품을 찾을 수 없습니다."),
     // 이메일 중복 가입 시도 시
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    // 쿠폰을 찾을 수 없을 때
+    NOT_FOUND_COUPON(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
+    // 유효하지 않은 쿠폰 코드일 때
+    INVALID_COUPON_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 쿠폰 코드입니다."),
+    // 이미 등록된 쿠폰일 때
+    ALREADY_REGISTERED_COUPON(HttpStatus.CONFLICT, "이미 등록된 쿠폰입니다.");
     private final HttpStatus status;
     private final String message;
 }

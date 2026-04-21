@@ -1,4 +1,4 @@
-package com.sparta.msa_project_part_3.domain.product.dto.response;
+package com.sparta.msa_project_part_3.global.response;
 
 import lombok.Getter;
 import org.springframework.data.domain.Page;
