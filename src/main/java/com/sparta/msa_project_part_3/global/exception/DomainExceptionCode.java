@@ -24,6 +24,8 @@ public enum DomainExceptionCode {
     NOT_FOUND_COUPON(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
     // 유효하지 않은 쿠폰 코드일 때
     INVALID_COUPON_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 쿠폰 코드입니다."),
+    // 쿠폰 사용 한도 초과 시
+    COUPON_USAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "쿠폰 사용 한도를 초과했습니다."),
     // 이미 등록된 쿠폰일 때
     ALREADY_REGISTERED_COUPON(HttpStatus.CONFLICT, "이미 등록된 쿠폰입니다.");
     private final HttpStatus status;

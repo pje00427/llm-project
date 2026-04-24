@@ -4,9 +4,13 @@ import com.sparta.msa_project_part_3.domain.coupon.entity.Coupon;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -35,4 +39,10 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             @Param("now") LocalDateTime now,
             @Param("productPrice") BigDecimal productPrice
     );
+
+    // 쿠폰 사용 시 usedCount 증가를 위한 비관적 락 조회
+    // 동시에 여러 명이 사용할 때 usedCount 업데이트 유실 방지
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Coupon c WHERE c.id = :id")
+    Optional<Coupon> findByIdForUpdate(@Param("id") Long id);
 }

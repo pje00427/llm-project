@@ -178,17 +178,30 @@ public class CouponService {
     // 쿠폰 사용하기
     @Transactional
     public void useCoupon(Long couponUserId) {
+        // 사용할 쿠폰 조회
         CouponUser couponUser = couponUserRepository.findById(couponUserId)
                 .orElseThrow(() -> new DomainException(DomainExceptionCode.INVALID_COUPON_CODE));
 
+        // REGISTERED 상태인지 확인 (UNREGISTERED, USED 상태면 사용 불가)
         if (couponUser.getStatus() != CouponStatus.REGISTERED) {
             throw new DomainException(DomainExceptionCode.ALREADY_REGISTERED_COUPON);
         }
 
-        // coupon_user 상태 변경
+        // Coupon에 비관적 락 걸고 조회
+        // 동시 사용 시 usedCount 업데이트 유실 방지
+        Coupon coupon = couponRepository.findByIdForUpdate(couponUser.getCoupon().getId())
+                .orElseThrow(() -> new DomainException(DomainExceptionCode.NOT_FOUND_COUPON));
+
+        // 사용 한도 체크 (usageLimit이 null이면 무제한)
+        if (coupon.getUsageLimit() != null
+                && coupon.getUsedCount() >= coupon.getUsageLimit()) {
+            throw new DomainException(DomainExceptionCode.COUPON_USAGE_LIMIT_EXCEEDED);
+        }
+
+        // 쿠폰 상태 USED로 변경
         couponUser.use();
 
-        // coupon used_count 증가
-        couponUser.getCoupon().increaseUsedCount();
+        // 쿠폰 사용 횟수 증가
+        coupon.increaseUsedCount();
     }
 }
