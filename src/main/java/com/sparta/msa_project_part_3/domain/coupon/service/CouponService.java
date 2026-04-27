@@ -23,6 +23,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,22 +142,26 @@ public class CouponService {
     // 쿠폰 등록 (비관적 락으로 동시 등록 방지)
     @Transactional
     public void registerCoupon(CouponRegisterRequest request) {
-        // 비관적 락으로 조회
-        CouponUser couponUser = couponUserRepository.findByCode(request.getCouponCode())
-                .orElseThrow(() -> new DomainException(DomainExceptionCode.INVALID_COUPON_CODE));
+        try {
+            CouponUser couponUser = couponUserRepository.findByCode(request.getCouponCode())
+                    .orElseThrow(() -> new DomainException(DomainExceptionCode.INVALID_COUPON_CODE));
 
-        // 참조하는 coupon이 삭제됐는지 체크 추가 ← 이 부분 추가!
-        if (couponUser.getCoupon().getIsDeleted()) {
-            throw new DomainException(DomainExceptionCode.INVALID_COUPON_CODE);
-        }
+            // 삭제된 쿠폰 체크
+            if (couponUser.getCoupon().getIsDeleted()) {
+                throw new DomainException(DomainExceptionCode.INVALID_COUPON_CODE);
+            }
 
-        // 이미 등록된 쿠폰인지 확인
-        if (couponUser.getStatus() != CouponStatus.UNREGISTERED) {
+            // 이미 등록된 쿠폰 체크
+            if (couponUser.getStatus() != CouponStatus.UNREGISTERED) {
+                throw new DomainException(DomainExceptionCode.ALREADY_REGISTERED_COUPON);
+            }
+
+            couponUser.register(request.getUserId());
+
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // 동시 등록 시도 충돌 → 이미 등록된 쿠폰으로 처리
             throw new DomainException(DomainExceptionCode.ALREADY_REGISTERED_COUPON);
         }
-
-        // 쿠폰 등록
-        couponUser.register(request.getUserId());
     }
 
     // 특정 유저 쿠폰 목록 조회

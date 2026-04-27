@@ -1,0 +1,1 @@
+ALTER TABLE coupon_user ADD COLUMN version INTEGER DEFAULT 0;

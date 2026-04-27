@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import jakarta.persistence.Version;
 
 @Table(name = "coupon_user")
 @Entity

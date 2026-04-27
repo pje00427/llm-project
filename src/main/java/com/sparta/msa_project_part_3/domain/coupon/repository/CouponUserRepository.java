@@ -15,8 +15,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CouponUserRepository extends JpaRepository<CouponUser, Long> {
 
-    // 쿠폰 코드로 조회 + 비관적 락 (동시 등록 방지)
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    // 쿠폰 코드로 조회
+    // 비관적 락 제거 → 낙관적 락으로 변경
+    @Lock(LockModeType.OPTIMISTIC)
     @Query("SELECT cu FROM CouponUser cu JOIN FETCH cu.coupon WHERE cu.code = :code")
     Optional<CouponUser> findByCode(@Param("code") String code);
 
