@@ -61,6 +61,7 @@ public class ProductRagService {
                 condition.getCategory(),
                 condition.getMinPrice(),
                 condition.getMaxPrice(),
+                null,
                 pageable
         );
 
