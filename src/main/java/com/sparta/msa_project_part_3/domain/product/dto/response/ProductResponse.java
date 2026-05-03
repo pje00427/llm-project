@@ -17,6 +17,8 @@ public class ProductResponse {
     private Integer stock;
     private Double rating;
     private String categoryName;
+    private Boolean isOrderable;
+    private String productType;
 
     public static ProductResponse from(Product product) {
         return ProductResponse.builder()
@@ -28,6 +30,8 @@ public class ProductResponse {
                 .categoryName(product.getCategory() != null
                         ? product.getCategory().getName()
                         : null)
+                .isOrderable(product.getIsOrderable())    // 추가
+                .productType(product.getProductType())    // 추가
                 .build();
     }
 }

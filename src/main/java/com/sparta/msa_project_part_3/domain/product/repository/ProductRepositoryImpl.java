@@ -20,31 +20,33 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
     private final QProduct product = QProduct.product;
 
     @Override
-    public Page<Product> searchProducts(String keyword, String category, Integer minPrice, Integer maxPrice, Pageable pageable) {
+    public Page<Product> searchProducts(String keyword, String category, Integer minPrice, Integer maxPrice, Boolean isOrderable, Pageable pageable) {
 
         List<Product> content = queryFactory
-                .selectFrom(product)
-                .where(
-                        keywordContains(keyword),
-                        categoryContains(category),
-                        priceGoe(minPrice),
-                        priceLoe(maxPrice)
-                )
-                .orderBy(product.createdAt.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+            .selectFrom(product)
+            .where(
+                keywordContains(keyword),
+                categoryContains(category),
+                priceGoe(minPrice),
+                priceLoe(maxPrice),
+                isOrderableEq(isOrderable)
+            )
+            .orderBy(product.createdAt.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
         Long total = queryFactory
-                .select(product.count())
-                .from(product)
-                .where(
-                        keywordContains(keyword),
-                        categoryContains(category),
-                        priceGoe(minPrice),
-                        priceLoe(maxPrice)
-                )
-                .fetchOne();
+            .select(product.count())
+            .from(product)
+            .where(
+                keywordContains(keyword),
+                categoryContains(category),
+                priceGoe(minPrice),
+                priceLoe(maxPrice),
+                isOrderableEq(isOrderable)
+            )
+            .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);
     }
@@ -72,5 +74,9 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     private BooleanExpression priceLoe(Integer maxPrice) {
         return maxPrice != null ? product.price.loe(maxPrice) : null;
+    }
+
+    private BooleanExpression isOrderableEq(Boolean isOrderable) {
+        return isOrderable != null ? product.isOrderable.eq(isOrderable) : null;
     }
 }

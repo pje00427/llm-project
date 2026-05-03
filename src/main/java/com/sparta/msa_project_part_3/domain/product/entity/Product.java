@@ -40,4 +40,36 @@ public class Product {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(unique = true)
+    private String externalProductId;
+
+    @Column(nullable = false)
+    private Boolean isOrderable = true;
+
+    @Column(nullable = false)
+    private String productType = "INTERNAL";
+
+    public static Product createExternal(String externalProductId, String name,
+        String description, Integer price, Integer stock, Boolean isOrderable) {
+        Product product = new Product();
+        product.externalProductId = externalProductId;
+        product.name = name;
+        product.description = description;
+        product.price = price;
+        product.stock = stock;
+        product.isOrderable = isOrderable;
+        product.productType = "EXTERNAL";
+        product.rating = 0.0;
+        return product;
+    }
+
+    public void updateFromExternal(String name, String description,
+        Integer price, Integer stock, Boolean isOrderable) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.isOrderable = isOrderable;
+    }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.sparta.msa_project_part_3.domain.coupon.dto.response.MaxDiscountResponse;
 import com.sparta.msa_project_part_3.domain.coupon.service.CouponService;
+import com.sparta.msa_project_part_3.domain.product.dto.response.ProductListResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
@@ -48,5 +49,13 @@ public class ProductController {
     public ResponseEntity<ApiResponse<MaxDiscountResponse>> getMaxDiscount(
             @PathVariable Long productId) {
         return ApiResponse.ok(couponService.getMaxDiscount(productId));
+    }
+    @GetMapping
+    public ResponseEntity<ApiResponse<ProductListResponse>> getProducts(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) Boolean isOrderable,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        return ApiResponse.ok(productService.getProducts(category, isOrderable, pageable));
     }
 }
